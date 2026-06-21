@@ -19,6 +19,6 @@ public interface ITypeAnalysisService
     public (string TypeFullName, TypeAnalysisAttributeInfo[] Attributes)? GetTypeAttributes(string assemblyPath, string typeName);
     public TypeAnalysisInfo[] GetNestedTypes(Type parentType);
     public (string TypeFullName, TypeAnalysisInfo[] NestedTypes)? GetNestedTypes(string assemblyPath, string typeName);
-    public TypeAnalysisInfo[] GetTypesFromAssembly(string assemblyPath);
+    public TypeAnalysisInfo[] GetTypesFromAssembly(string assemblyPath, IReadOnlyList<string>? additionalSearchDirectories = null);
 }
 

@@ -6,6 +6,8 @@ public interface IAssemblyInspectionContext : IDisposable
 {
     Assembly Assembly { get; }
 
+    IReadOnlyList<string> UnresolvedDependencies { get; }
+
     IEnumerable<Type> GetTypes();
 
     MemberInfo[] GetMembers(Type type, BindingFlags flags);
