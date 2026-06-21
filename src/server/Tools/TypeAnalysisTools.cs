@@ -55,7 +55,10 @@ public static class TypeAnalysisTools
             var pageSize = Math.Max(1, maxItems ?? defaultPageSize);
             var offset = 0;
 
-            var cacheKey = $"types_from_assembly_{CacheKeyHelper.FileStamp(assemblyPath)}_{pageSize}";
+            var dependencyScope = searchDirectories is { Length: > 0 }
+                ? string.Join("|", searchDirectories.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+                : "";
+            var cacheKey = $"types_from_assembly_{CacheKeyHelper.FileStamp(assemblyPath)}_{pageSize}_{dependencyScope}";
             var salt = TokenHelper.MakeSalt(cacheKey);
 
             if (!string.IsNullOrWhiteSpace(continuationToken))
@@ -94,7 +97,7 @@ public static class TypeAnalysisTools
             return JsonHelpers.ErrorWithGuidance(
                 "DependencyResolutionFailed",
                 ex.Message,
-                suggestion: $"The dependencies ({string.Join(", ", ex.UnresolvedDependencies)}) were not found next to the assembly or in the NuGet cache. Point assemblyPath at a build-output directory (e.g. bin/Debug/<tfm>) that contains these DLLs, or pass their folder via additionalAssemblies.");
+                suggestion: $"The dependencies ({string.Join(", ", ex.UnresolvedDependencies)}) were not found next to the assembly or in the NuGet cache. Re-run with assemblyPath pointing at a copy of the assembly in a build-output folder (e.g. bin/Debug/<tfm>/Name.dll) whose sibling DLLs include these dependencies, or pass the dependency DLL file paths via additionalAssemblies.");
         }
         catch (Exception ex)
         {

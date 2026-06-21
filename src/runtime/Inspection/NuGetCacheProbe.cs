@@ -46,7 +46,7 @@ internal static class NuGetCacheProbe
         var cacheRoot = GetCacheRoot();
         if (string.IsNullOrWhiteSpace(cacheRoot) || !Directory.Exists(cacheRoot)) return candidates;
 
-        foreach (var packageDir in SafeEnumerateDirectories(cacheRoot))
+        foreach (var packageDir in SafeEnumerateDirectories(cacheRoot).OrderBy(d => d, StringComparer.Ordinal))
         {
             var packageName = Path.GetFileName(packageDir);
             if (packageName.Equals(excludePackageId, StringComparison.OrdinalIgnoreCase)) continue;
@@ -63,7 +63,7 @@ internal static class NuGetCacheProbe
                 var tfm = PickCompatibleTfm(tfms, consumingTfm);
                 if (tfm is null) continue;
 
-                candidates.AddRange(Directory.EnumerateFiles(Path.Combine(libDir, tfm), "*.dll", SearchOption.TopDirectoryOnly));
+                candidates.AddRange(Directory.GetFiles(Path.Combine(libDir, tfm), "*.dll", SearchOption.TopDirectoryOnly).OrderBy(f => f, StringComparer.Ordinal));
             }
             catch { }
         }
@@ -113,21 +113,84 @@ internal static class NuGetCacheProbe
     {
         var exact = availableTfms.FirstOrDefault(t => t.Equals(requested, StringComparison.OrdinalIgnoreCase));
         if (exact is not null) return exact;
+
+        var target = ParseTfm(requested);
         return availableTfms
-            .Where(t => IsCompatibleFramework(t, requested))
-            .OrderByDescending(t => t, StringComparer.OrdinalIgnoreCase)
+            .Select(t => (raw: t, parsed: ParseTfm(t)))
+            .Where(t => IsCompatible(t.parsed, target))
+            .OrderByDescending(t => CompatibilityRank(t.parsed.family, target.family))
+            .ThenByDescending(t => t.parsed.version)
+            .ThenBy(t => t.raw, StringComparer.OrdinalIgnoreCase)
+            .Select(t => t.raw)
             .FirstOrDefault();
     }
 
-    private static bool IsCompatibleFramework(string availableFramework, string targetFramework)
-    {
-        if (availableFramework.Equals(targetFramework, StringComparison.OrdinalIgnoreCase)) return true;
-        if (targetFramework.StartsWith("net", StringComparison.Ordinal) && !targetFramework.Contains("framework"))
+    private static bool IsCompatible((TfmFamily family, Version version) available, (TfmFamily family, Version version) target) =>
+        target.family switch
         {
-            if (availableFramework.Equals("netstandard2.0", StringComparison.OrdinalIgnoreCase) ||
-                availableFramework.Equals("netstandard2.1", StringComparison.OrdinalIgnoreCase))
-                return true;
+            TfmFamily.NetCore => available.family switch
+            {
+                TfmFamily.NetCore => available.version <= target.version,
+                TfmFamily.NetCoreApp => true,
+                TfmFamily.NetStandard => available.version <= new Version(2, 1),
+                _ => false
+            },
+            TfmFamily.NetCoreApp => available.family switch
+            {
+                TfmFamily.NetCoreApp => available.version <= target.version,
+                TfmFamily.NetStandard => available.version <= new Version(2, 1),
+                _ => false
+            },
+            TfmFamily.NetStandard => available.family == TfmFamily.NetStandard && available.version <= target.version,
+            TfmFamily.NetFramework => (available.family == TfmFamily.NetFramework && available.version <= target.version)
+                || (available.family == TfmFamily.NetStandard && available.version <= new Version(2, 0)),
+            _ => false
+        };
+
+    private static int CompatibilityRank(TfmFamily available, TfmFamily target)
+    {
+        if (available == target) return 3;
+        return available switch
+        {
+            TfmFamily.NetCore or TfmFamily.NetCoreApp => 2,
+            TfmFamily.NetStandard => 1,
+            _ => 0
+        };
+    }
+
+    private enum TfmFamily { NetCore, NetCoreApp, NetStandard, NetFramework, Unknown }
+
+    private static (TfmFamily family, Version version) ParseTfm(string tfm)
+    {
+        var lower = tfm.ToLowerInvariant();
+        if (lower.StartsWith("netstandard", StringComparison.Ordinal))
+            return (TfmFamily.NetStandard, TryParseVersion(lower[11..]) ?? new Version(0, 0));
+        if (lower.StartsWith("netcoreapp", StringComparison.Ordinal))
+            return (TfmFamily.NetCoreApp, TryParseVersion(lower[10..]) ?? new Version(0, 0));
+        if (lower.StartsWith("net", StringComparison.Ordinal) && !lower.Contains("framework"))
+        {
+            var rest = lower[3..];
+            if (IsFrameworkStyleTfm(rest))
+                return (TfmFamily.NetFramework, ParseFrameworkStyleVersion(rest));
+            var version = TryParseVersion(rest);
+            if (version is not null) return (TfmFamily.NetCore, version);
         }
-        return false;
+        return (TfmFamily.Unknown, new Version(0, 0));
+    }
+
+    private static bool IsFrameworkStyleTfm(string rest)
+    {
+        if (rest.Length is not (2 or 3)) return false;
+        foreach (var ch in rest)
+            if (!char.IsDigit(ch)) return false;
+        return rest[0] is >= '1' and <= '4';
+    }
+
+    private static Version ParseFrameworkStyleVersion(string rest)
+    {
+        var major = rest[0] - '0';
+        var minor = rest[1] - '0';
+        if (rest.Length == 2) return new Version(major, minor);
+        return new Version(major, minor, rest[2] - '0');
     }
 }

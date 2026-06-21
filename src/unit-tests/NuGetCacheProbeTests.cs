@@ -53,19 +53,55 @@ public class NuGetCacheProbeTests
         Assert.Contains(candidates, c => string.Equals(c, dependency, StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void EnumerateCandidateDependencyDlls_AcceptsLowerNetTfm()
+    {
+        using var cache = new TempCache();
+        cache.AddPackageDll("pkga", "1.0.0", "net8.0", "PkgA.dll");
+        var dependency = cache.AddPackageDll("depb", "2.0.0", "net6.0", "DepB.dll");
+
+        var candidates = NuGetCacheProbe.EnumerateCandidateDependencyDlls("net8.0", "pkga");
+
+        Assert.Contains(candidates, c => string.Equals(c, dependency, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void EnumerateCandidateDependencyDlls_PrefersNearestCompatibleTfm()
+    {
+        using var cache = new TempCache();
+        cache.AddPackageDll("pkga", "1.0.0", "net8.0", "PkgA.dll");
+        cache.AddPackageDll("depb", "2.0.0", "net6.0", "DepB.dll");
+        var preferred = cache.AddPackageDll("depb", "2.0.0", "net8.0", "DepB.dll");
+
+        var candidates = NuGetCacheProbe.EnumerateCandidateDependencyDlls("net8.0", "pkga");
+
+        Assert.Contains(preferred, candidates);
+        Assert.DoesNotContain(candidates, c => c.Contains($"{Path.DirectorySeparatorChar}net6.0{Path.DirectorySeparatorChar}"));
+    }
+
     private sealed class TempCache : IDisposable
     {
+        private static readonly object EnvLock = new();
         private readonly string? _previous;
 
         public TempCache()
         {
-            Root = Path.Combine(Path.GetTempPath(), $"sherlock_cache_{Guid.NewGuid():N}");
-            Directory.CreateDirectory(Root);
-            _previous = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-            Environment.SetEnvironmentVariable("NUGET_PACKAGES", Root);
+            Monitor.Enter(EnvLock);
+            try
+            {
+                Root = Path.Combine(Path.GetTempPath(), $"sherlock_cache_{Guid.NewGuid():N}");
+                Directory.CreateDirectory(Root);
+                _previous = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+                Environment.SetEnvironmentVariable("NUGET_PACKAGES", Root);
+            }
+            catch
+            {
+                Monitor.Exit(EnvLock);
+                throw;
+            }
         }
 
-        public string Root { get; }
+        public string Root { get; } = "";
 
         public string AddPackageDll(string packageId, string version, string tfm, string fileName)
         {
@@ -78,8 +114,15 @@ public class NuGetCacheProbeTests
 
         public void Dispose()
         {
-            Environment.SetEnvironmentVariable("NUGET_PACKAGES", _previous);
-            try { Directory.Delete(Root, recursive: true); } catch { }
+            try
+            {
+                Environment.SetEnvironmentVariable("NUGET_PACKAGES", _previous);
+                try { Directory.Delete(Root, recursive: true); } catch { }
+            }
+            finally
+            {
+                Monitor.Exit(EnvLock);
+            }
         }
     }
 }
