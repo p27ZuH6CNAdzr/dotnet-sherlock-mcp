@@ -5,16 +5,19 @@ namespace Sherlock.MCP.Runtime.Inspection;
 public sealed class MetadataOnlyInspectionContext : IAssemblyInspectionContext
 {
     private readonly MetadataLoadContext _mlc;
+    private string[] _unresolvedDependencies = [];
 
-    public MetadataOnlyInspectionContext(string assemblyPath)
+    public MetadataOnlyInspectionContext(string assemblyPath, IReadOnlyList<string>? additionalSearchDirectories = null)
     {
-        var resolver = MetadataResolverFactory.Create(assemblyPath);
+        var resolver = MetadataResolverFactory.Create(assemblyPath, additionalSearchDirectories);
         var coreAssemblyName = typeof(object).Assembly.GetName().Name;
         _mlc = new MetadataLoadContext(resolver, coreAssemblyName);
         Assembly = _mlc.LoadFromAssemblyPath(Path.GetFullPath(assemblyPath));
     }
 
     public Assembly Assembly { get; }
+
+    public IReadOnlyList<string> UnresolvedDependencies => _unresolvedDependencies;
 
     public IEnumerable<Type> GetTypes()
     {
@@ -24,6 +27,7 @@ public sealed class MetadataOnlyInspectionContext : IAssemblyInspectionContext
         }
         catch (ReflectionTypeLoadException ex)
         {
+            _unresolvedDependencies = DependencyDiagnostics.ExtractUnresolved(ex);
             return ex.Types.Where(t => t != null).Cast<Type>();
         }
     }

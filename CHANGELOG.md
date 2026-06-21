@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-06-21
+
+### Added
+
+- Transitive dependency resolution from the NuGet global packages cache. When an assembly is loaded from an isolated `lib/<tfm>` folder (e.g. `~/.nuget/packages/.../lib/net8.0/`) whose dependencies are not sitting alongside it, the loader now probes the cache for the best framework-compatible build of each dependency package. This makes type introspection work against bare NuGet assemblies (such as `Azure.ResourceManager.MachineLearning`) without needing a build output directory.
+- `GetTypesFromAssembly` now accepts an optional `additionalAssemblies` parameter so callers can point at sibling dependency DLLs (e.g. a `bin/Debug/<tfm>` folder) to resolve types when automatic probing is insufficient.
+
+### Fixed
+
+- `GetTypesFromAssembly` no longer returns a silent empty result when an assembly's dependencies cannot be resolved. It now reports a structured `DependencyResolutionFailed` error naming the unresolved assemblies and how to supply them, instead of masking the failure behind an empty list.
+
 ## [2.11.0] - 2026-06-12
 
 ### Added

@@ -226,27 +226,47 @@ public class TypeAnalysisService : ITypeAnalysisService, IDisposable
         }
     }
 
-    public TypeAnalysisInfo[] GetTypesFromAssembly(string assemblyPath)
+    public TypeAnalysisInfo[] GetTypesFromAssembly(string assemblyPath, IReadOnlyList<string>? additionalSearchDirectories = null)
     {
+        using var lease = _contexts.Acquire(assemblyPath, additionalSearchDirectories: additionalSearchDirectories);
+        var context = lease.Context;
+        TypeAnalysisInfo[] types;
         try
         {
-            using var lease = _contexts.Acquire(assemblyPath);
-            return lease.Context.GetTypes()
+            types = context.GetTypes()
                 .Where(t => t.IsPublic || t.IsNestedPublic)
                 .Select(GetTypeInfo)
                 .ToArray();
         }
         catch (ReflectionTypeLoadException ex)
         {
-            return ex.Types
+            var unresolved = Combine(context.UnresolvedDependencies, DependencyDiagnostics.ExtractUnresolved(ex));
+            if (unresolved.Length > 0)
+                throw new DependencyResolutionException(assemblyPath, unresolved);
+            types = ex.Types
                 .Where(t => t != null && (t.IsPublic || t.IsNestedPublic))
                 .Select(t => GetTypeInfo(t!))
                 .ToArray();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return [];
+            var unresolved = Combine(context.UnresolvedDependencies, DependencyDiagnostics.ExtractUnresolved(ex));
+            if (unresolved.Length == 0) throw;
+            throw new DependencyResolutionException(assemblyPath, unresolved);
         }
+
+        if (types.Length == 0 && context.UnresolvedDependencies.Count > 0)
+            throw new DependencyResolutionException(assemblyPath, context.UnresolvedDependencies);
+
+        return types;
+    }
+
+    private static string[] Combine(IReadOnlyList<string> existing, params string?[] extras)
+    {
+        var names = new SortedSet<string>(existing, StringComparer.OrdinalIgnoreCase);
+        foreach (var extra in extras)
+            if (!string.IsNullOrWhiteSpace(extra)) names.Add(extra);
+        return names.ToArray();
     }
 
     private static bool InheritsFromDelegate(Type type)

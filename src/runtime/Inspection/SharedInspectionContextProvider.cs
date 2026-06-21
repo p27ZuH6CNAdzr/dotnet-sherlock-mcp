@@ -75,10 +75,10 @@ public sealed class SharedInspectionContextProvider : IInspectionContextProvider
 
     public SharedInspectionContextProvider(RuntimeOptions options) => _options = options;
 
-    public InspectionContextLease Acquire(string assemblyPath, bool forceRuntimeLoad = false)
+    public InspectionContextLease Acquire(string assemblyPath, bool forceRuntimeLoad = false, IReadOnlyList<string>? additionalSearchDirectories = null)
     {
         var fullPath = Path.GetFullPath(assemblyPath);
-        var key = forceRuntimeLoad ? $"{fullPath}|runtime" : fullPath;
+        var key = (forceRuntimeLoad ? $"{fullPath}|runtime" : fullPath) + BuildDepsKey(additionalSearchDirectories);
         var fileInfo = new FileInfo(fullPath);
         if (!fileInfo.Exists)
             throw new FileNotFoundException($"Assembly file not found: {fullPath}", fullPath);
@@ -89,7 +89,7 @@ public sealed class SharedInspectionContextProvider : IInspectionContextProvider
         while (true)
         {
             var lazy = _entries.GetOrAdd(key, _ => new Lazy<Entry>(
-                () => new Entry(InspectionContextFactory.Create(fullPath, forceRuntimeLoad), stampTicks, length),
+                () => new Entry(InspectionContextFactory.Create(fullPath, forceRuntimeLoad, additionalSearchDirectories), stampTicks, length),
                 LazyThreadSafetyMode.ExecutionAndPublication));
 
             Entry entry;
@@ -130,6 +130,22 @@ public sealed class SharedInspectionContextProvider : IInspectionContextProvider
             if (pair.Value.IsValueCreated)
                 pair.Value.Value.Retire();
         }
+    }
+
+    private static string BuildDepsKey(IReadOnlyList<string>? directories)
+    {
+        if (directories == null || directories.Count == 0) return "";
+
+        var normalized = directories
+            .Where(d => !string.IsNullOrWhiteSpace(d))
+            .Select(Path.GetFullPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (normalized.Length == 0) return "";
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(string.Join("|", normalized));
+        return "|deps:" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes))[..16];
     }
 
     private void EvictOverflow()

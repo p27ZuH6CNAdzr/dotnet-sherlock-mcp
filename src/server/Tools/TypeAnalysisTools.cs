@@ -22,7 +22,8 @@ public static class TypeAnalysisTools
         [Description("Maximum number of types to return (default: 50)")] int? maxItems = null,
         [Description("Items to skip (paging)")] int? skip = null,
         [Description("Continuation token for paging")] string? continuationToken = null,
-        [Description("Response shape. 'summary' (default, token-lean): { FullName, Namespace, Kind } only - use for browsing/searching. 'full': adds attributes, base type, interfaces, generic params, nested types - use only when you need those fields on every item.")] string projection = "summary")
+        [Description("Response shape. 'summary' (default, token-lean): { FullName, Namespace, Kind } only - use for browsing/searching. 'full': adds attributes, base type, interfaces, generic params, nested types - use only when you need those fields on every item.")] string projection = "summary",
+        [Description("Optional paths to dependency assemblies (.dll) to help resolve types. Only needed when types fail to resolve and the assembly's dependencies are not next to it or in the NuGet cache - e.g. point at sibling DLLs in a build-output folder.")] string[]? additionalAssemblies = null)
     {
         try
         {
@@ -33,14 +34,31 @@ public static class TypeAnalysisTools
             if (normalizedProjection != "summary" && normalizedProjection != "full")
                 return JsonHelpers.Error("InvalidProjection", "projection must be 'summary' or 'full'");
 
-            var allTypes = typeAnalysis.GetTypesFromAssembly(assemblyPath);
+            string[]? searchDirectories = null;
+            if (additionalAssemblies is { Length: > 0 })
+            {
+                var scope = AssemblyScope.BuildAndValidate(assemblyPath, additionalAssemblies);
+                if (scope.Error != null)
+                    return scope.Error;
+                searchDirectories = scope.Paths
+                    .Select(Path.GetDirectoryName)
+                    .Where(d => !string.IsNullOrEmpty(d))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Cast<string>()
+                    .ToArray();
+            }
+
+            var allTypes = typeAnalysis.GetTypesFromAssembly(assemblyPath, searchDirectories);
 
             // Pagination logic
             var defaultPageSize = 50;
             var pageSize = Math.Max(1, maxItems ?? defaultPageSize);
             var offset = 0;
 
-            var cacheKey = $"types_from_assembly_{CacheKeyHelper.FileStamp(assemblyPath)}_{pageSize}";
+            var dependencyScope = searchDirectories is { Length: > 0 }
+                ? string.Join("|", searchDirectories.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+                : "";
+            var cacheKey = $"types_from_assembly_{CacheKeyHelper.FileStamp(assemblyPath)}_{pageSize}_{dependencyScope}";
             var salt = TokenHelper.MakeSalt(cacheKey);
 
             if (!string.IsNullOrWhiteSpace(continuationToken))
@@ -73,6 +91,13 @@ public static class TypeAnalysisTools
                 types
             };
             return JsonHelpers.Envelope("type.list", result);
+        }
+        catch (DependencyResolutionException ex)
+        {
+            return JsonHelpers.ErrorWithGuidance(
+                "DependencyResolutionFailed",
+                ex.Message,
+                suggestion: $"The dependencies ({string.Join(", ", ex.UnresolvedDependencies)}) were not found next to the assembly or in the NuGet cache. Re-run with assemblyPath pointing at a copy of the assembly in a build-output folder (e.g. bin/Debug/<tfm>/Name.dll) whose sibling DLLs include these dependencies, or pass the dependency DLL file paths via additionalAssemblies.");
         }
         catch (Exception ex)
         {
