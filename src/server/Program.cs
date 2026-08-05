@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol.Protocol;
 using Sherlock.MCP.Runtime;
 using Sherlock.MCP.Runtime.Caching;
 using Sherlock.MCP.Runtime.Indexing;
@@ -40,6 +41,17 @@ const string serverInstructions =
     Prefer full type names (Namespace.Type). Tool names are snake_case; argument names are camelCase.
     """;
 
+// The tool set is scanned from the assembly once at startup and never varies per caller,
+// so clients may cache tools/list for a long time and share it across authorization contexts.
+var toolListTimeToLive = TimeSpan.FromHours(1);
+
+// ttlMs and cacheScope were introduced by the 2026-07-28 revision; earlier revisions reject them
+// as unrecognized keys. The SDK only defaults these fields, it does not strip ones we set, so the
+// version gate has to live here. Revisions are YYYY-MM-DD, so an ordinal compare is chronological.
+static bool SupportsCachingHints(ModelContextProtocol.Server.RequestContext<ListToolsRequestParams> request) =>
+    (request.JsonRpcRequest.Context?.ProtocolVersion ?? request.Server.NegotiatedProtocolVersion) is { } version
+    && string.CompareOrdinal(version, "2026-07-28") >= 0;
+
 builder.Services
     .AddSingleton<RuntimeOptions>()
     .AddSingleton<IInspectionContextProvider, SharedInspectionContextProvider>()
@@ -56,7 +68,22 @@ builder.Services
     .AddSingleton<ToolMiddleware>()
     .AddMcpServer(options => options.ServerInstructions = serverInstructions)
     .WithStdioServerTransport()
-    .WithToolsFromAssembly();
+    .WithToolsFromAssembly()
+    .WithRequestFilters(filters => filters.AddListToolsFilter(next => async (request, cancellationToken) =>
+    {
+        var result = await next(request, cancellationToken);
+
+        if (request.Params?.Cursor is null && result.NextCursor is null)
+            result.Tools = [.. result.Tools.OrderBy(tool => tool.Name, StringComparer.Ordinal)];
+
+        if (SupportsCachingHints(request))
+        {
+            result.TimeToLive = toolListTimeToLive;
+            result.CacheScope = CacheScope.Public;
+        }
+
+        return result;
+    }));
 
 await builder.Build().RunAsync();
 return 0;

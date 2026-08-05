@@ -18,7 +18,7 @@ public static class MemberAnalysisTools
         WriteIndented = true
     };
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Methods", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets methods from a type with filtering and pagination. Returns a lean summary ({ name, signature }) by default - the signature already encodes return type, parameters, and modifiers in C# form. Pass projection='full' when you need structured fields (parameters[], attributes, returnType, isStatic/Virtual/Abstract/..., genericTypeParameters); prefer AnalyzeMethod for one method. Large types may have 100+ methods - use nameContains filter or maxItems=25 for efficiency.")]
     public static string GetTypeMethods(
         IMemberAnalysisService memberAnalysisService,
@@ -174,7 +174,7 @@ public static class MemberAnalysisTools
 
 
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Member Attributes", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets custom attributes for a specific member (method, property, field, event, constructor). Returns attribute types and values. Use after identifying the member via GetTypeMethods or similar tools.")]
     public static string GetMemberAttributes(
         IInspectionContextProvider contexts,
@@ -219,7 +219,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Parameter Attributes", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets custom attributes for a specific parameter of a method or constructor. Use when you need to inspect parameter-level attributes like [FromBody], [Required], etc.")]
     public static string GetParameterAttributes(
         IInspectionContextProvider contexts,
@@ -262,7 +262,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Properties", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets properties from a type with filtering and pagination. Returns getter/setter info, indexers, and access modifiers. Prefer over GetAllTypeMembers when only properties needed.")]
     public static string GetTypeProperties(
         IMemberAnalysisService memberAnalysisService,
@@ -395,7 +395,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Fields", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets fields from a type with filtering and pagination. Returns const/readonly/volatile info and constant values. Fields are compact - can use larger maxItems (75+).")]
     public static string GetTypeFields(
         IMemberAnalysisService memberAnalysisService,
@@ -516,7 +516,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Events", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets events from a type with filtering and pagination. Returns event handler types and add/remove accessor info. Most types have few events.")]
     public static string GetTypeEvents(
         IMemberAnalysisService memberAnalysisService,
@@ -636,7 +636,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Constructors", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets constructors from a type with filtering and pagination. Returns parameter info and access modifiers. Most types have few constructors - use maxItems=30.")]
     public static string GetTypeConstructors(
         IMemberAnalysisService memberAnalysisService,
@@ -759,7 +759,7 @@ public static class MemberAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get All Type Members", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets ALL members (methods, properties, fields, events, constructors) in one call. WARNING: Can produce very large responses for complex types. Consider using specific member tools (GetTypeMethods, GetTypeProperties) with filtering first for better efficiency.")]
     public static string GetAllTypeMembers(
         IMemberAnalysisService memberAnalysisService,

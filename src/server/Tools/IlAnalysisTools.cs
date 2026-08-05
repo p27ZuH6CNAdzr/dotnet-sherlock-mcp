@@ -12,7 +12,7 @@ public static class IlAnalysisTools
 {
     private static readonly string[] MethodNotFoundAlternatives = { "GetTypeMethods", "AnalyzeType" };
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Method Calls", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Analyzes a method's IL body to list what it calls and which fields it touches (the 'what does this method call?' question that signature-level tools can't answer). Aggregates across all overloads of the method name. Returns a lean summary by default (distinct target names); projection='full' adds per-call kind (call/callvirt/newobj/ldftn) and the source overload signature.")]
     public static string GetMethodCalls(
         IIlAnalysisService ilAnalysis,

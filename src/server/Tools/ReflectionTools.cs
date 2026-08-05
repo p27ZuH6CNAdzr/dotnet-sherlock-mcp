@@ -14,7 +14,7 @@ public static class ReflectionTools
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
-    [McpServerTool]
+    [McpServerTool(Title = "Analyze Assembly", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Lists all public types in an assembly with metadata summary. Returns totalTypeCount for pagination planning. Use maxItems=25 for large assemblies (100+ types). Follow with GetTypeInfo for specific types.")]
     public static string AnalyzeAssembly(
         IInspectionContextProvider contexts,
@@ -102,7 +102,7 @@ public static class ReflectionTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Assembly Info", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets assembly-level metadata: identity/version, target framework, and referenced assemblies. Lightweight orientation tool — call before deep type analysis. Use projection='full' for all assembly-level attributes structurally.")]
     public static string GetAssemblyInfo(
         IInspectionContextProvider contexts,
@@ -276,7 +276,7 @@ public static class ReflectionTools
         return allMembers;
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Analyze Type", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets type metadata with paginated members (constructors, methods, properties, fields). Returns member totals for pagination planning. Use include* flags to filter member categories. Consider GetTypeMethods etc. for targeted queries.")]
     public static string AnalyzeType(
         IInspectionContextProvider contexts,
@@ -408,7 +408,7 @@ public static class ReflectionTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Find Assembly by Class Name", ReadOnly = true, Destructive = false)]
     [Description("Finds assembly path by searching for a class name in bin/Debug, bin/Release folders. Use when you know the class but not the assembly path. Returns path for use with other tools.")]
     public static string FindAssemblyByClassName(
         [Description("The class name to search for (e.g., 'MyClass').")] string className,
@@ -436,7 +436,7 @@ public static class ReflectionTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Find Assembly by File Name", ReadOnly = true, Destructive = false)]
     [Description("Finds assembly path by DLL filename search. Use when you know the assembly name but not full path. Returns path for use with other tools.")]
     public static string FindAssemblyByFileName(
         [Description("The file name of the assembly to search for (e.g., 'MyProject.dll').")] string assemblyFileName,
@@ -464,7 +464,7 @@ public static class ReflectionTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Find Assembly by NuGet Package", ReadOnly = true, Destructive = false)]
     [Description("Finds an assembly in the local NuGet cache by package id. Probes ~/.nuget/packages (or NUGET_PACKAGES env var). Use when you know the package id/version but not the DLL path. Picks highest version and best TFM when omitted.")]
     public static async Task<string> FindAssemblyByNugetPackage(
         IProjectAnalysisService projectAnalysis,
@@ -533,7 +533,7 @@ public static class ReflectionTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Analyze Method", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets detailed info about a specific method including all overloads, parameters, attributes, and return types. Use after finding method via GetTypeMethods. Lightweight response.")]
     public static string AnalyzeMethod(
         IInspectionContextProvider contexts,

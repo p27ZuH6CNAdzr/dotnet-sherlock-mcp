@@ -21,7 +21,8 @@ This tool is essential for developers who want to harness LLM capabilities for:
 *   **Stable JSON API**: Consistent envelopes with versioning and structured error codes
 *   **.NET 9.0 Native**: Built on the latest .NET platform with modern C# features
 *   **Project Integration**: Solution and project file analysis with dependency resolution
-*   **Current MCP SDK**: Built on `ModelContextProtocol` 1.4.0 (GA)
+*   **Current MCP SDK**: Built on `ModelContextProtocol` 2.1.0 (GA)
+*   **Current MCP Specification**: Speaks protocol revision `2026-07-28`, and negotiates down automatically for clients on earlier revisions
 
 ## What's New in 2.11.0
 
