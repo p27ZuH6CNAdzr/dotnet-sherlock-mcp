@@ -10,7 +10,7 @@ namespace Sherlock.MCP.Server.Tools;
 [McpServerToolType]
 public static class XmlDocTools
 {
-    [McpServerTool]
+    [McpServerTool(Title = "Get XML Docs for Type", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets XML documentation (summary, remarks, examples) for a type from adjacent .xml file. Requires XML docs to be generated during build. Lightweight response.")]
     public static string GetXmlDocsForType(
         IXmlDocService xmlDocs,
@@ -39,7 +39,7 @@ public static class XmlDocTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get XML Docs for Member", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets XML documentation (summary, params, returns, exceptions) for a member from adjacent .xml file. Requires XML docs to be generated during build. Lightweight response.")]
     public static string GetXmlDocsForMember(
         IXmlDocService xmlDocs,

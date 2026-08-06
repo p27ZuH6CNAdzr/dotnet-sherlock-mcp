@@ -11,7 +11,7 @@ public static class ProjectAnalysisTools
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
-    [McpServerTool]
+    [McpServerTool(Title = "Analyze Solution", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Parses a .sln file and lists all contained projects with paths. Use as entry point to discover project structure before AnalyzeProject. Lightweight response.")]
     public static async Task<string> AnalyzeSolution(
         IProjectAnalysisService projectAnalysis,
@@ -28,7 +28,7 @@ public static class ProjectAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Analyze Project", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Parses a project file (.csproj/.vbproj/.fsproj) returning target framework, package refs, project refs, and output paths. Use GetProjectOutputPaths to find compiled assemblies.")]
     public static async Task<string> AnalyzeProject(
         IProjectAnalysisService projectAnalysis,
@@ -45,7 +45,7 @@ public static class ProjectAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Project Output Paths", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets compiled assembly output paths for a project by configuration. Use to find DLL paths for assembly analysis tools. Lightweight response.")]
     public static async Task<string> GetProjectOutputPaths(
         IProjectAnalysisService projectAnalysis,
@@ -63,7 +63,7 @@ public static class ProjectAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Resolve Package References", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Resolves NuGet package references to local assembly paths from NuGet cache. Use packageName filter to find specific packages. Returns paths for assembly analysis.")]
     public static async Task<string> ResolvePackageReferences(
         IProjectAnalysisService projectAnalysis,
@@ -81,7 +81,7 @@ public static class ProjectAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Find deps.json Dependencies", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Parses deps.json from build output to list all runtime dependencies including transitive refs. Useful for understanding full dependency graph.")]
     public static async Task<string> FindDepsJsonDependencies(
         IProjectAnalysisService projectAnalysis,

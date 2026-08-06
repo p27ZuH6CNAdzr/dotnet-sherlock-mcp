@@ -55,7 +55,7 @@ Since the MCP server runs as a separate process, it cannot access the client's l
 - **Caching Layer**: Configurable TTL-based caching for expensive operations
 - **Memory Efficiency**: Streaming and chunked processing for large assemblies
 
-The server uses `Microsoft.Extensions.Hosting` with dependency injection and the `ModelContextProtocol` 1.4.0 (GA) package.
+The server uses `Microsoft.Extensions.Hosting` with dependency injection and the `ModelContextProtocol` 2.1.0 (GA) package, which implements MCP specification revision `2026-07-28`. The server is stdio-only; it advertises behavioural annotations (`readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`) on every tool and caching hints (`ttlMs`, `cacheScope`) on `tools/list`.
 
 ## .NET Type Analysis (Sherlock MCP)
 

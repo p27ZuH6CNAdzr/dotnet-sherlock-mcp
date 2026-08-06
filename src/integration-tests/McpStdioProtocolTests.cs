@@ -10,6 +10,8 @@ public class McpStdioProtocolTests
 {
     private const int ExpectedToolCount = 36;
 
+    private const string CurrentProtocolVersion = "2026-07-28";
+
     private static readonly Regex SnakeCase = new("^[a-z0-9]+(_[a-z0-9]+)*$", RegexOptions.Compiled);
 
     private static string ServerDll => Path.Combine(AppContext.BaseDirectory, "Sherlock.MCP.Server.dll");
@@ -58,6 +60,79 @@ public class McpStdioProtocolTests
 
         foreach (var name in names)
             Assert.True(SnakeCase.IsMatch(name), $"Tool name '{name}' is not snake_case.");
+    }
+
+    [Fact]
+    public async Task Client_negotiates_the_current_protocol_revision()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await using var client = await ConnectAsync(cts.Token);
+
+        Assert.Equal(CurrentProtocolVersion, client.NegotiatedProtocolVersion);
+    }
+
+    [Fact]
+    public async Task Tools_list_advertises_caching_hints()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await using var client = await ConnectAsync(cts.Token);
+
+        var result = await client.ListToolsAsync(new ListToolsRequestParams(), cts.Token);
+
+        Assert.Null(result.NextCursor);
+        Assert.Equal(ExpectedToolCount, result.Tools.Count);
+        Assert.Equal(CacheScope.Public, result.CacheScope);
+        Assert.NotNull(result.TimeToLive);
+        Assert.True(
+            result.TimeToLive > TimeSpan.Zero,
+            $"tools/list should advertise a positive ttlMs; the tool set is static. Got {result.TimeToLive}.");
+    }
+
+    [Fact]
+    public async Task Tools_list_returns_a_deterministic_order()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await using var client = await ConnectAsync(cts.Token);
+
+        var first = await client.ListToolsAsync(new ListToolsRequestParams(), cts.Token);
+        var second = await client.ListToolsAsync(new ListToolsRequestParams(), cts.Token);
+
+        var names = first.Tools.Select(t => t.Name).ToArray();
+
+        Assert.Equal(names, second.Tools.Select(t => t.Name));
+        Assert.Equal(names.OrderBy(n => n, StringComparer.Ordinal), names);
+    }
+
+    [Fact]
+    public async Task Tools_advertise_behavioural_annotations()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await using var client = await ConnectAsync(cts.Token);
+
+        var tools = (await client.ListToolsAsync(new ListToolsRequestParams(), cts.Token))
+            .Tools.ToDictionary(t => t.Name);
+
+        foreach (var tool in tools.Values)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(tool.Title), $"Tool '{tool.Name}' should advertise a title.");
+            Assert.NotNull(tool.Annotations);
+            Assert.NotEqual(true, tool.Annotations!.DestructiveHint);
+        }
+
+        var readOnly = tools["get_type_methods"];
+        Assert.Equal(true, readOnly.Annotations!.ReadOnlyHint);
+        Assert.Equal(false, readOnly.Annotations.OpenWorldHint);
+
+        // Discovery tools scan search roots for an unbounded set of assemblies, so they stay open-world.
+        Assert.NotEqual(false, tools["find_assembly_by_class_name"].Annotations!.OpenWorldHint);
+
+        // The only tool that mutates server state.
+        var mutating = tools["update_runtime_options"];
+        Assert.NotEqual(true, mutating.Annotations!.ReadOnlyHint);
+        Assert.Equal(true, mutating.Annotations.IdempotentHint);
+
+        var readOnlyCount = tools.Values.Count(t => t.Annotations?.ReadOnlyHint == true);
+        Assert.Equal(ExpectedToolCount - 1, readOnlyCount);
     }
 
     [Fact]

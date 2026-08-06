@@ -8,7 +8,7 @@ namespace Sherlock.MCP.Server.Tools;
 [McpServerToolType]
 public static class ConfigTools
 {
-    [McpServerTool]
+    [McpServerTool(Title = "Get Runtime Options", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets current runtime configuration (default page sizes, cache TTL, search roots). Use to understand current settings before UpdateRuntimeOptions.")]
     public static string GetRuntimeOptions(RuntimeOptions options)
     {
@@ -26,7 +26,7 @@ public static class ConfigTools
         return JsonHelpers.Envelope("runtime.options", result);
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Update Runtime Options", Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Updates runtime configuration. Reduce defaultMaxItems for smaller responses, increase cacheTtlSeconds for better performance. Omit fields to keep current values.")]
     public static string UpdateRuntimeOptions(
         RuntimeOptions options,

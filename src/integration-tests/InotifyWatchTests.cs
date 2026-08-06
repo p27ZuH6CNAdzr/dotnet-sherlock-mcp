@@ -70,10 +70,12 @@ public class InotifyWatchTests
 
     private static async Task DriveServerToReadyAsync(Process proc, TimeSpan timeout)
     {
-        const string initializeRequest =
-            """{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"sherlock-inotify-test","version":"0.0.1"}}}""";
+        // 2026-07-28 retired the initialize handshake: each request declares its own protocol
+        // version in _meta, so a bare tools/list is enough to drive the server to a ready state.
+        const string readyRequest =
+            """{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"sherlock-inotify-test","version":"0.0.1"},"io.modelcontextprotocol/clientCapabilities":{}}}}""";
 
-        await proc.StandardInput.WriteLineAsync(initializeRequest);
+        await proc.StandardInput.WriteLineAsync(readyRequest);
         await proc.StandardInput.FlushAsync();
 
         using var cts = new CancellationTokenSource(timeout);
@@ -81,13 +83,13 @@ public class InotifyWatchTests
         {
             var line = await proc.StandardOutput.ReadLineAsync(cts.Token);
             if (line is null)
-                throw new InvalidOperationException("MCP server stdout closed before responding to initialize.");
+                throw new InvalidOperationException("MCP server stdout closed before responding to tools/list.");
 
             if (TryParseResponseId(line, out var id) && id == 1)
                 return;
         }
 
-        throw new TimeoutException($"MCP server did not respond to initialize within {timeout.TotalSeconds:F0}s.");
+        throw new TimeoutException($"MCP server did not respond to tools/list within {timeout.TotalSeconds:F0}s.");
     }
 
     private static bool TryParseResponseId(string line, out int id)

@@ -14,7 +14,7 @@ public static class TypeAnalysisTools
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Types from Assembly", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Lists public types from an assembly. Returns a lean summary ({ FullName, Namespace, Kind }) by default - use this to browse or search large assemblies. Pass projection='full' when you need attributes, inheritance, interfaces, generic params, and nested types; prefer GetTypeInfo for a single type instead. Returns totalTypeCount for pagination planning; use maxItems=25 for very large assemblies.")]
     public static string GetTypesFromAssembly(
         ITypeAnalysisService typeAnalysis,
@@ -105,7 +105,7 @@ public static class TypeAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Info", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets detailed metadata for a single type including accessibility, inheritance, interfaces, and member counts. Lightweight response - use as entry point before exploring members with GetTypeMethods etc.")]
     public static string GetTypeInfo(
         ITypeAnalysisService typeAnalysis,
@@ -129,7 +129,7 @@ public static class TypeAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Hierarchy", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets full inheritance chain and implemented interfaces for a type. Use to understand type relationships and find inherited members. Lightweight response. By default derivedTypes is null with a note - pass additionalAssemblies to compute derived/implementing types via the same scan as FindImplementationsOf.")]
     public static string GetTypeHierarchy(
         ITypeAnalysisService typeAnalysis,
@@ -162,7 +162,7 @@ public static class TypeAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Generic Type Info", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets generic type parameters, constraints, and variance for generic types. Only useful for types where IsGenericType=true. Lightweight response.")]
     public static string GetGenericTypeInfo(
         ITypeAnalysisService typeAnalysis,
@@ -183,7 +183,7 @@ public static class TypeAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Type Attributes", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets custom attributes declared on a type (e.g., [Serializable], [Obsolete]). Returns attribute types and values. Lightweight response.")]
     public static string GetTypeAttributes(
         ITypeAnalysisService typeAnalysis,
@@ -205,7 +205,7 @@ public static class TypeAnalysisTools
         }
     }
 
-    [McpServerTool]
+    [McpServerTool(Title = "Get Nested Types", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Gets nested/inner types declared within a type. Use for types with inner classes, structs, or enums. Lightweight response.")]
     public static string GetNestedTypes(
         ITypeAnalysisService typeAnalysis,
