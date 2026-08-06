@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-08-06
+
+### Added
+
+- Behavioural annotations on all 36 tools (`readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`) alongside a human-readable title. Every tool was previously declared with a bare `[McpServerTool]`, so the SDK advertised its pessimistic defaults (`destructiveHint: true`, `readOnlyHint: false`) — inaccurate for the 35 tools that only read metadata. Assembly-discovery tools remain open-world since they scan search roots for an unbounded set of assemblies, and `UpdateRuntimeOptions` is the only mutating tool. (#56)
+- Caching hints on `tools/list` (`ttlMs`, `cacheScope`), introduced by MCP revision `2026-07-28`. The tool set is scanned once at startup and holds no per-caller data, so it is advertised as publicly cacheable for one hour. Tools are also returned in a deterministic order, which keeps client caches and LLM prompt caches stable across reconnects. (#56)
+
+### Changed
+
+- Upgraded `ModelContextProtocol` from 1.4.0 to 2.1.0, which implements MCP specification revision `2026-07-28`. Clients now negotiate the current revision rather than falling back to an older one, and the handshake-less request flow — no `initialize` exchange, with the protocol version declared per request in `_meta` — is supported. Clients speaking earlier revisions continue to work unchanged and are not sent any of the new result fields. The server remains stdio-only. (#56)
+- Updated the `server.json` registry schema reference from `2025-09-16` to `2025-12-11`. (#56)
+
+### Removed
+
+- `GEMINI.md`. The agent-facing guidance in `CLAUDE.md` and `README.md` remains current.
+
 ## [2.12.0] - 2026-06-21
 
 ### Added

@@ -24,10 +24,11 @@ This tool is essential for developers who want to harness LLM capabilities for:
 *   **Current MCP SDK**: Built on `ModelContextProtocol` 2.1.0 (GA)
 *   **Current MCP Specification**: Speaks protocol revision `2026-07-28`, and negotiates down automatically for clients on earlier revisions
 
-## What's New in 2.11.0
+## What's New in 2.13.0
 
-- **Built-in usage guidance**: the server now emits MCP usage instructions to connecting clients, so agents learn the token-efficient projections and discovery → type → member workflow without external docs.
-- **Refreshed agent guidance**: `CLAUDE.md`, `GEMINI.md`, the README, and the runtime member-analysis docs now document the snake_case tool names, lean `projection` defaults, and recommended analysis workflow. See `CHANGELOG.md` for full details.
+- **MCP 2026-07-28**: upgraded to `ModelContextProtocol` 2.1.0, so clients negotiate the current specification revision instead of falling back. The handshake-less request flow is supported, and clients on earlier revisions keep working unchanged.
+- **Tool annotations**: all 36 tools now advertise a title plus accurate behavioural hints (`readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`), so clients can tell at a glance that 35 of them only read metadata.
+- **Cacheable tool list**: `tools/list` advertises `ttlMs` and `cacheScope` and returns tools in a deterministic order, letting clients skip redundant re-fetches. See `CHANGELOG.md` for full details.
 
 ## Installation
 
