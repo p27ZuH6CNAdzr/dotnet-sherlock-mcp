@@ -71,7 +71,7 @@ public class InotifyWatchTests
     private static async Task DriveServerToReadyAsync(Process proc, TimeSpan timeout)
     {
         // 2026-07-28 retired the initialize handshake: each request declares its own protocol
-        // version in _meta, so a bare tools/call is enough to drive the server to a ready state.
+        // version in _meta, so a bare tools/list is enough to drive the server to a ready state.
         const string readyRequest =
             """{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"sherlock-inotify-test","version":"0.0.1"},"io.modelcontextprotocol/clientCapabilities":{}}}}""";
 
