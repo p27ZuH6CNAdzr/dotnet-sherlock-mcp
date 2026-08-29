@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Sherlock.MCP.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:Sherlock.MCP.Tests.TestSampleClass">
+            <summary>Sample class for tests with parameters</summary>
+        </member>
+        <member name="M:Sherlock.MCP.Tests.TestSampleClass.MethodWithParameters(System.Int32,System.String,System.Object[])">
+            <summary>Method with parameters and attribute for testing</summary>
+            <param name="required">required</param>
+            <param name="optional">optional</param>
+            <param name="values">values</param>
+            <returns>none</returns>
+        </member>
+    </members>
+</doc>

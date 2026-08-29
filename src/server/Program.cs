@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 using Sherlock.MCP.Runtime;
 using Sherlock.MCP.Runtime.Caching;
+using Sherlock.MCP.Runtime.Configuration;
 using Sherlock.MCP.Runtime.Indexing;
 using Sherlock.MCP.Runtime.Inspection;
 using Sherlock.MCP.Runtime.Telemetry;
@@ -19,6 +20,46 @@ if (args.Length > 0 && (args[0] == "--version" || args[0] == "-v"))
     return 0;
 }
 
+// Handle help command to document framework targeting option
+if (args.Length > 0 && (args[0] == "--help" || args[0] == "-h"))
+{
+    Console.WriteLine("""
+        Sherlock MCP Server
+        
+        Usage: sherlock-mcp [OPTIONS]
+        
+        Options:
+          --target-frameworks FRAMEWORKS   Comma-separated list of .NET versions to target.
+                                          Examples: net10.0,net11.0 (default)
+                                                   net6.0,net7.0,net8.0,net9.0,net10.0,net11.0 (legacy analysis)
+                                          Default: net10.0,net11.0 (modern stack)
+          --version, -v                    Show version and exit
+          --help, -h                       Show this help message
+        """);
+    return 0;
+}
+
+// Parse CLI option for target frameworks
+var targetFrameworks = ParseTargetFrameworks(args);
+
+string[]? ParseTargetFrameworks(string[] cliArgs)
+{
+    var index = Array.IndexOf(cliArgs, "--target-frameworks");
+    if (index >= 0 && index + 1 < cliArgs.Length)
+    {
+        var frameworks = cliArgs[index + 1]
+            .Split(',')
+            .Select(tf => tf.Trim())
+            .Where(tf => !string.IsNullOrEmpty(tf))
+            .ToArray();
+
+        if (frameworks.Length > 0)
+            return frameworks;
+    }
+
+    return null; // Use FrameworkOptions defaults
+}
+
 var builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings
 {
     Args = args,
@@ -28,7 +69,13 @@ builder.Logging.AddConsole(consoleLogOptions =>
     consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
 });
 
-const string serverInstructions =
+string GetFrameworkInstructions(string[]? frameworks)
+{
+    var frameworkOptions = new FrameworkOptions(frameworks);
+    return $"\n\nThis instance targets: {frameworkOptions.SupportedFrameworksDisplay}";
+}
+
+var serverInstructions =
     """
     Sherlock provides .NET assembly introspection via reflection. Prefer these tools over guessing about .NET APIs.
 
@@ -39,7 +86,7 @@ const string serverInstructions =
     For relationships use find_implementations_of, find_methods_returning, find_extension_methods_for, and find_references_to (set analysisDepth='il' to resolve inbound callers); use get_method_calls to see what a method body invokes.
 
     Prefer full type names (Namespace.Type). Tool names are snake_case; argument names are camelCase.
-    """;
+    """ + GetFrameworkInstructions(targetFrameworks);
 
 // The tool set is scanned from the assembly once at startup and never varies per caller,
 // so clients may cache tools/list for a long time and share it across authorization contexts.
@@ -53,6 +100,7 @@ static bool SupportsCachingHints(ModelContextProtocol.Server.RequestContext<List
     && string.CompareOrdinal(version, "2026-07-28") >= 0;
 
 builder.Services
+    .AddSingleton(new FrameworkOptions(targetFrameworks))
     .AddSingleton<RuntimeOptions>()
     .AddSingleton<IInspectionContextProvider, SharedInspectionContextProvider>()
     .AddSingleton<IToolResponseCache, InMemoryToolResponseCache>()

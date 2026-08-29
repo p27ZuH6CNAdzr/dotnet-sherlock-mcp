@@ -1,0 +1,13 @@
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/bin/Debug/net10.0/Sherlock.MCP.Runtime.deps.json
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/bin/Debug/net10.0/Sherlock.MCP.Runtime.dll
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/bin/Debug/net10.0/Sherlock.MCP.Runtime.pdb
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.csproj.AssemblyReference.cache
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.GeneratedMSBuildEditorConfig.editorconfig
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.AssemblyInfoInputs.cache
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.AssemblyInfo.cs
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.csproj.CoreCompileInputs.cache
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.sourcelink.json
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.dll
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/refint/Sherlock.MCP.Runtime.dll
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/Sherlock.MCP.Runtime.pdb
+/Users/david.sorenson/git/dotnet-sherlock-mcp/src/runtime/obj/Debug/net10.0/ref/Sherlock.MCP.Runtime.dll
