@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Sherlock.MCP.Example")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0deb409c863fda4fad4bee7bd70ce197b9237336")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5842eab8e57e1121a12b129b082935632d393ee4")]
 [assembly: System.Reflection.AssemblyProductAttribute("Sherlock.MCP.Example")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Sherlock.MCP.Example")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
