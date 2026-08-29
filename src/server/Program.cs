@@ -2,11 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 using Sherlock.MCP.Runtime;
 using Sherlock.MCP.Runtime.Caching;
 using Sherlock.MCP.Runtime.Configuration;
 using Sherlock.MCP.Runtime.Indexing;
 using Sherlock.MCP.Runtime.Inspection;
+using Sherlock.MCP.Runtime.Resources;
 using Sherlock.MCP.Runtime.Telemetry;
 using Sherlock.MCP.Server.Middleware;
 using System.Reflection;
@@ -113,25 +115,29 @@ builder.Services
     .AddSingleton<IReverseLookupService, ReverseLookupService>()
     .AddSingleton<IIlAnalysisService, IlAnalysisService>()
     .AddSingleton<ISearchService, SearchService>()
+    .AddSingleton<IResourceProvider, AssemblyResourceProvider>()
     .AddSingleton<ToolMiddleware>()
     .AddMcpServer(options => options.ServerInstructions = serverInstructions)
     .WithStdioServerTransport()
     .WithToolsFromAssembly()
-    .WithRequestFilters(filters => filters.AddListToolsFilter(next => async (request, cancellationToken) =>
+    .WithRequestFilters(filters =>
     {
-        var result = await next(request, cancellationToken);
-
-        if (request.Params?.Cursor is null && result.NextCursor is null)
-            result.Tools = [.. result.Tools.OrderBy(tool => tool.Name, StringComparer.Ordinal)];
-
-        if (SupportsCachingHints(request))
+        filters.AddListToolsFilter(next => async (request, cancellationToken) =>
         {
-            result.TimeToLive = toolListTimeToLive;
-            result.CacheScope = CacheScope.Public;
-        }
+            var result = await next(request, cancellationToken);
 
-        return result;
-    }));
+            if (request.Params?.Cursor is null && result.NextCursor is null)
+                result.Tools = [.. result.Tools.OrderBy(tool => tool.Name, StringComparer.Ordinal)];
+
+            if (SupportsCachingHints(request))
+            {
+                result.TimeToLive = toolListTimeToLive;
+                result.CacheScope = CacheScope.Public;
+            }
+
+            return result;
+        });
+    });
 
 await builder.Build().RunAsync();
 return 0;
