@@ -24,6 +24,22 @@ This tool is essential for developers who want to harness LLM capabilities for:
 *   **Current MCP SDK**: Built on `ModelContextProtocol` 2.1.0 (GA)
 *   **Current MCP Specification**: Speaks protocol revision `2026-07-28`, and negotiates down automatically for clients on earlier revisions
 
+## What's New in 2.14.0
+
+- **Configurable .NET Version Targeting**: Add `--target-frameworks` CLI flag to target net6.0–net11.0 (default: net10.0, net11.0). Enables framework migration analysis — agents can compare the same assembly across versions to recommend upgrade paths.
+- **Resources (Assembly Metadata Queries)**: 5 new resource patterns for context-based analysis without calling tools:
+  - `assembly:///<path>/types` — list all public types
+  - `assembly:///<path>/types/<Type>` — get type detail 
+  - `assembly:///<path>/types/<Type>/members` — get methods, properties, fields, events
+  - `assembly:///<path>/metadata` — get assembly identity, version, target framework
+  - `assembly:///<path>/references` — get assembly dependencies
+- **Prompts (Workflow Templates)**: 5 built-in prompt workflows for common analysis patterns:
+  - `api-surface-analysis` — analyze public API surface
+  - `type-hierarchy-trace` — get inheritance chain and implementations
+  - `method-call-graph` — trace method calls and callers
+  - `dependency-inventory` — build complete dependency list
+  - `breaking-change-detection` — compare versions for breaking changes
+
 ## What's New in 2.13.0
 
 - **MCP 2026-07-28**: upgraded to `ModelContextProtocol` 2.1.0, so clients negotiate the current specification revision instead of falling back. The handshake-less request flow is supported, and clients on earlier revisions keep working unchanged.
@@ -111,6 +127,88 @@ For system-wide usage, add to your global agent settings:
 
 ```text
 For .NET work, use the Sherlock MCP tools (snake_case) to analyze assemblies, types, and members instead of guessing. Start lean and opt into projection='full' only when you need detail.
+```
+
+## Running Against Specific .NET Versions
+
+By default, Sherlock targets `net10.0` and `net11.0` (modern stack). To analyze legacy projects or support framework migration workflows, pass `--target-frameworks`:
+
+```bash
+# Modern stack (default)
+sherlock-mcp
+
+# Legacy analysis (help modernize old codebases)
+sherlock-mcp --target-frameworks net6.0,net7.0,net8.0,net9.0,net10.0,net11.0
+
+# LTS only
+sherlock-mcp --target-frameworks net10.0
+```
+
+This is especially useful for agents tasked with framework migration analysis — they can load the same assembly compiled for multiple versions, compare signatures, and recommend upgrade paths.
+
+## Resources: Context Queries Without Tools
+
+Resources provide static assembly metadata that clients can read as context without calling tools, reducing token consumption and enabling context-based analysis workflows.
+
+**Resource Patterns:**
+
+```
+assembly:///<path>/types
+  → List all public types with brief metadata (hierarchy, interfaces)
+
+assembly:///<path>/types/<Namespace.Type>
+  → Get detailed type metadata (members summary, base type, interfaces)
+
+assembly:///<path>/types/<Namespace.Type>/members
+  → Get all public members with signatures (methods, properties, fields, events)
+
+assembly:///<path>/metadata
+  → Assembly identity, version, target framework, culture, public key token (JSON format)
+
+assembly:///<path>/references
+  → All resolved assembly dependencies with versions (table format)
+```
+
+**Example: Fetch type metadata as context**
+
+```text
+Read resource assembly:///Users/me/MyLib.dll/types/System.Collections.Generic.List
+
+This returns full type metadata without calling a tool, letting you include it directly in context.
+```
+
+## Prompts: Discoverable Workflow Templates
+
+Prompts are reusable, parameterized message templates for common Sherlock analysis patterns. Call a prompt by name with arguments to get structured instructions on which tools to use and in what order.
+
+**Built-in Prompts:**
+
+1. **`api-surface-analysis`** (required: `assemblyPath`)
+   - Analyze the public API surface of an assembly
+   - Returns instructions to list types and drill into key members
+
+2. **`type-hierarchy-trace`** (required: `assemblyPath`, `typeName`)
+   - Get full inheritance chain and implementations for a type
+   - Returns instructions to trace base types, interfaces, and derived types
+
+3. **`method-call-graph`** (required: `assemblyPath`, `typeName`, `methodName`)
+   - Trace what a method calls and what calls it
+   - Returns instructions to inspect method IL and reverse-lookup callers
+
+4. **`dependency-inventory`** (required: `assemblyPath`)
+   - Build complete inventory of dependencies (NuGet packages, .NET libraries, internal assemblies)
+   - Returns instructions to fetch and categorize references
+
+5. **`breaking-change-detection`** (required: `oldAssemblyPath`, `newAssemblyPath`)
+   - Compare two versions to detect breaking changes
+   - Returns instructions to load both, compare signatures, and report removals/modifications
+
+**Example: Get a prompt**
+
+```text
+Show me the 'api-surface-analysis' prompt for /Users/me/MyLib.dll
+
+This returns structured instructions on which Sherlock tools to use to analyze the public API.
 ```
 
 ## How To Prompt It
