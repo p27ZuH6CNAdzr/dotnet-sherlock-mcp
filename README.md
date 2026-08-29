@@ -4,47 +4,47 @@
 
 This tool is essential for developers who want to harness LLM capabilities for:
 
-*   **Deep codebase analysis** - Understanding complex .NET architectures and dependencies
-*   **Precise type information** - Getting detailed metadata about types, members, and their signatures
-*   **Automated documentation** - Extracting and utilizing XML documentation and attributes
-*   **Custom tooling** - Building sophisticated tools that interact with .NET assemblies
-*   **Code generation** - Creating accurate code based on existing type structures
+* **Deep codebase analysis** - Understanding complex .NET architectures and dependencies
+* **Precise type information** - Getting detailed metadata about types, members, and their signatures
+* **Automated documentation** - Extracting and utilizing XML documentation and attributes
+* **Custom tooling** - Building sophisticated tools that interact with .NET assemblies
+* **Code generation** - Creating accurate code based on existing type structures
 
 ## Key Features
 
-*   **Comprehensive MCP Server**: Provides 36 specialized tools for .NET assembly analysis
-*   **Advanced Assembly Introspection**: Deep reflection-based analysis of types, members, and metadata
-*   **Rich Member Analysis**: Detailed inspection of methods, properties, fields, events, and constructors
-*   **Smart Filtering & Pagination**: Advanced filtering by name/attributes with efficient pagination for large datasets
-*   **XML Documentation Integration**: Automatic extraction of summary, parameters, returns, and remarks
-*   **Performance Optimized**: Caching, streaming, and memory-efficient processing
-*   **Stable JSON API**: Consistent envelopes with versioning and structured error codes
-*   **.NET 9.0 Native**: Built on the latest .NET platform with modern C# features
-*   **Project Integration**: Solution and project file analysis with dependency resolution
-*   **Current MCP SDK**: Built on `ModelContextProtocol` 2.1.0 (GA)
-*   **Current MCP Specification**: Speaks protocol revision `2026-07-28`, and negotiates down automatically for clients on earlier revisions
+* **Comprehensive MCP Server**: Provides 36 specialized tools for .NET assembly analysis
+* **Advanced Assembly Introspection**: Deep reflection-based analysis of types, members, and metadata
+* **Rich Member Analysis**: Detailed inspection of methods, properties, fields, events, and constructors
+* **Smart Filtering & Pagination**: Advanced filtering by name/attributes with efficient pagination for large datasets
+* **XML Documentation Integration**: Automatic extraction of summary, parameters, returns, and remarks
+* **Performance Optimized**: Caching, streaming, and memory-efficient processing
+* **Stable JSON API**: Consistent envelopes with versioning and structured error codes
+* **.NET 9.0 Native**: Built on the latest .NET platform with modern C# features
+* **Project Integration**: Solution and project file analysis with dependency resolution
+* **Current MCP SDK**: Built on `ModelContextProtocol` 2.1.0 (GA)
+* **Current MCP Specification**: Speaks protocol revision `2026-07-28`, and negotiates down automatically for clients on earlier revisions
 
 ## What's New in 2.14.0
 
-- **Configurable .NET Version Targeting**: Add `--target-frameworks` CLI flag to target net6.0–net11.0 (default: net10.0, net11.0). Enables framework migration analysis — agents can compare the same assembly across versions to recommend upgrade paths.
-- **Resources (Assembly Metadata Queries)**: 5 new resource patterns for context-based analysis without calling tools:
-  - `assembly:///<path>/types` — list all public types
-  - `assembly:///<path>/types/<Type>` — get type detail 
-  - `assembly:///<path>/types/<Type>/members` — get methods, properties, fields, events
-  - `assembly:///<path>/metadata` — get assembly identity, version, target framework
-  - `assembly:///<path>/references` — get assembly dependencies
-- **Prompts (Workflow Templates)**: 5 built-in prompt workflows for common analysis patterns:
-  - `api-surface-analysis` — analyze public API surface
-  - `type-hierarchy-trace` — get inheritance chain and implementations
-  - `method-call-graph` — trace method calls and callers
-  - `dependency-inventory` — build complete dependency list
-  - `breaking-change-detection` — compare versions for breaking changes
+* **Configurable .NET Version Targeting**: Add `--target-frameworks` CLI flag to target net6.0–net11.0 (default: net10.0, net11.0). Enables framework migration analysis — agents can compare the same assembly across versions to recommend upgrade paths.
+* **Resources (Assembly Metadata Queries)**: 5 new resource patterns for context-based analysis without calling tools:
+  * `assembly:///<path>/types` — list all public types
+  * `assembly:///<path>/types/<Type>` — get type detail
+  * `assembly:///<path>/types/<Type>/members` — get methods, properties, fields, events
+  * `assembly:///<path>/metadata` — get assembly identity, version, target framework
+  * `assembly:///<path>/references` — get assembly dependencies
+* **Prompts (Workflow Templates)**: 5 built-in prompt workflows for common analysis patterns:
+  * `api-surface-analysis` — analyze public API surface
+  * `type-hierarchy-trace` — get inheritance chain and implementations
+  * `method-call-graph` — trace method calls and callers
+  * `dependency-inventory` — build complete dependency list
+  * `breaking-change-detection` — compare versions for breaking changes
 
 ## What's New in 2.13.0
 
-- **MCP 2026-07-28**: upgraded to `ModelContextProtocol` 2.1.0, so clients negotiate the current specification revision instead of falling back. The handshake-less request flow is supported, and clients on earlier revisions keep working unchanged.
-- **Tool annotations**: all 36 tools now advertise a title plus accurate behavioural hints (`readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`), so clients can tell at a glance that 35 of them only read metadata.
-- **Cacheable tool list**: `tools/list` advertises `ttlMs` and `cacheScope` and returns tools in a deterministic order, letting clients skip redundant re-fetches. See `CHANGELOG.md` for full details.
+* **MCP 2026-07-28**: upgraded to `ModelContextProtocol` 2.1.0, so clients negotiate the current specification revision instead of falling back. The handshake-less request flow is supported, and clients on earlier revisions keep working unchanged.
+* **Tool annotations**: all 36 tools now advertise a title plus accurate behavioural hints (`readOnlyHint`, `destructiveHint`, `openWorldHint`, `idempotentHint`), so clients can tell at a glance that 35 of them only read metadata.
+* **Cacheable tool list**: `tools/list` advertises `ttlMs` and `cacheScope` and returns tools in a deterministic order, letting clients skip redundant re-fetches. See `CHANGELOG.md` for full details.
 
 ## Installation
 
@@ -64,8 +64,8 @@ dotnet run --project src/server/Sherlock.MCP.Server.csproj
 
 Sherlock runs as a standard MCP server that communicates over stdio.
 
-- Cursor: Settings → MCP / Custom tools → Add tool → Command: `sherlock-mcp`
-- Claude Desktop / other MCP clients: Add a server entry pointing to the `sherlock-mcp` command. Example JSON entry (refer to your client’s docs for exact file location/format):
+* Cursor: Settings → MCP / Custom tools → Add tool → Command: `sherlock-mcp`
+* Claude Desktop / other MCP clients: Add a server entry pointing to the `sherlock-mcp` command. Example JSON entry (refer to your client’s docs for exact file location/format):
 
 ```jsonc
 {
@@ -152,7 +152,7 @@ Resources provide static assembly metadata that clients can read as context with
 
 **Resource Patterns:**
 
-```
+```text
 assembly:///<path>/types
   → List all public types with brief metadata (hierarchy, interfaces)
 
@@ -169,7 +169,7 @@ assembly:///<path>/references
   → All resolved assembly dependencies with versions (table format)
 ```
 
-**Example: Fetch type metadata as context**
+### Example: Fetch type metadata as context
 
 ```text
 Read resource assembly:///Users/me/MyLib.dll/types/System.Collections.Generic.List
@@ -184,26 +184,26 @@ Prompts are reusable, parameterized message templates for common Sherlock analys
 **Built-in Prompts:**
 
 1. **`api-surface-analysis`** (required: `assemblyPath`)
-   - Analyze the public API surface of an assembly
-   - Returns instructions to list types and drill into key members
+   * Analyze the public API surface of an assembly
+   * Returns instructions to list types and drill into key members
 
 2. **`type-hierarchy-trace`** (required: `assemblyPath`, `typeName`)
-   - Get full inheritance chain and implementations for a type
-   - Returns instructions to trace base types, interfaces, and derived types
+   * Get full inheritance chain and implementations for a type
+   * Returns instructions to trace base types, interfaces, and derived types
 
 3. **`method-call-graph`** (required: `assemblyPath`, `typeName`, `methodName`)
-   - Trace what a method calls and what calls it
-   - Returns instructions to inspect method IL and reverse-lookup callers
+   * Trace what a method calls and what calls it
+   * Returns instructions to inspect method IL and reverse-lookup callers
 
 4. **`dependency-inventory`** (required: `assemblyPath`)
-   - Build complete inventory of dependencies (NuGet packages, .NET libraries, internal assemblies)
-   - Returns instructions to fetch and categorize references
+   * Build complete inventory of dependencies (NuGet packages, .NET libraries, internal assemblies)
+   * Returns instructions to fetch and categorize references
 
 5. **`breaking-change-detection`** (required: `oldAssemblyPath`, `newAssemblyPath`)
-   - Compare two versions to detect breaking changes
-   - Returns instructions to load both, compare signatures, and report removals/modifications
+   * Compare two versions to detect breaking changes
+   * Returns instructions to load both, compare signatures, and report removals/modifications
 
-**Example: Get a prompt**
+### Example: Get a prompt
 
 ```text
 Show me the 'api-surface-analysis' prompt for /Users/me/MyLib.dll
@@ -264,66 +264,85 @@ On /abs/path/MyLib.dll: FindImplementationsOf MyNamespace.IMyService. Then FindR
 > **Tool names:** MCP clients call these tools in `snake_case` — `GetTypeMethods` → `get_type_methods`, `SearchMembers` → `search_members`, and so on. The PascalCase names used throughout this README match the underlying C# methods and the tool descriptions your client displays.
 
 ### Assembly Discovery & Analysis
-- **`AnalyzeAssembly`**: Complete assembly overview with public types and metadata
-- **`GetAssemblyInfo`**: Assembly-level metadata — identity/version, target framework, and referenced assemblies (`projection=full` adds all assembly attributes)
-- **`FindAssemblyByClassName`**: Locate assemblies containing specific class names
-- **`FindAssemblyByFileName`**: Find assemblies by file name in common build paths
-- **`FindAssemblyByNugetPackage`**: Resolve a DLL from the local NuGet cache by package id (optional `version`/`tfm`)
+
+* **`AnalyzeAssembly`**: Complete assembly overview with public types and metadata
+
+* **`GetAssemblyInfo`**: Assembly-level metadata — identity/version, target framework, and referenced assemblies (`projection=full` adds all assembly attributes)
+* **`FindAssemblyByClassName`**: Locate assemblies containing specific class names
+* **`FindAssemblyByFileName`**: Find assemblies by file name in common build paths
+* **`FindAssemblyByNugetPackage`**: Resolve a DLL from the local NuGet cache by package id (optional `version`/`tfm`)
 
 ### Type Introspection
-- **`GetTypesFromAssembly`**: List all public types with metadata (paginated)
-- **`AnalyzeType`**: Comprehensive type analysis with all members
-- **`GetTypeInfo`**: Detailed type metadata (accessibility, generics, nested types)
-- **`GetTypeHierarchy`**: Inheritance chain and interface implementations
-- **`GetGenericTypeInfo`**: Generic parameters, arguments, and variance information
-- **`GetTypeAttributes`**: Custom attributes declared on types
-- **`GetNestedTypes`**: Nested type declarations
+
+* **`GetTypesFromAssembly`**: List all public types with metadata (paginated)
+
+* **`AnalyzeType`**: Comprehensive type analysis with all members
+* **`GetTypeInfo`**: Detailed type metadata (accessibility, generics, nested types)
+* **`GetTypeHierarchy`**: Inheritance chain and interface implementations
+* **`GetGenericTypeInfo`**: Generic parameters, arguments, and variance information
+* **`GetTypeAttributes`**: Custom attributes declared on types
+* **`GetNestedTypes`**: Nested type declarations
 
 ### Member Analysis (Filterable & Paginated)
-- **`GetAllTypeMembers`**: All members across all categories
-- **`GetTypeMethods`**: Method signatures, overloads, and metadata
-- **`GetTypeProperties`**: Property details including getters/setters and indexers
-- **`GetTypeFields`**: Field information including constants and readonly fields
-- **`GetTypeEvents`**: Event declarations with handler types
-- **`GetTypeConstructors`**: Constructor signatures and parameters
-- **`AnalyzeMethod`**: Deep method analysis with overloads and attributes
+
+* **`GetAllTypeMembers`**: All members across all categories
+
+* **`GetTypeMethods`**: Method signatures, overloads, and metadata
+* **`GetTypeProperties`**: Property details including getters/setters and indexers
+* **`GetTypeFields`**: Field information including constants and readonly fields
+* **`GetTypeEvents`**: Event declarations with handler types
+* **`GetTypeConstructors`**: Constructor signatures and parameters
+* **`AnalyzeMethod`**: Deep method analysis with overloads and attributes
 
 ### Member Search
-- **`SearchMembers`**: Search a whole assembly for members whose name contains a fragment — the entry point when you know a member name but not its declaring type. Filter by `memberKinds` (`method|property|field|event|type`).
+
+* **`SearchMembers`**: Search a whole assembly for members whose name contains a fragment — the entry point when you know a member name but not its declaring type. Filter by `memberKinds` (`method|property|field|event|type`).
 
 ### Reverse Lookup
-- **`FindImplementationsOf`**: Types implementing an interface or deriving from a base class (open-generic match supported)
-- **`FindMethodsReturning`**: Methods whose return type matches a given type (open-generic match supported)
-- **`FindExtensionMethodsFor`**: Extension methods that extend a given type (scans static classes by `this`-parameter)
-- **`FindReferencesTo`**: Broader sweep across parameters, fields, properties, events, and generic arguments; pass `analysisDepth='il'` to also resolve inbound callers from method bodies
+
+* **`FindImplementationsOf`**: Types implementing an interface or deriving from a base class (open-generic match supported)
+
+* **`FindMethodsReturning`**: Methods whose return type matches a given type (open-generic match supported)
+* **`FindExtensionMethodsFor`**: Extension methods that extend a given type (scans static classes by `this`-parameter)
+* **`FindReferencesTo`**: Broader sweep across parameters, fields, properties, events, and generic arguments; pass `analysisDepth='il'` to also resolve inbound callers from method bodies
 
 ### IL Analysis
-- **`GetMethodCalls`**: Read a method's IL body to list what it calls and which fields it touches — the "what does this method do?" question signature-level tools can't answer (aggregates across overloads; use `.ctor`/`.cctor` for constructors)
+
+* **`GetMethodCalls`**: Read a method's IL body to list what it calls and which fields it touches — the "what does this method do?" question signature-level tools can't answer (aggregates across overloads; use `.ctor`/`.cctor` for constructors)
 
 ### Attributes & Metadata
-- **`GetMemberAttributes`**: Attributes for specific members
-- **`GetParameterAttributes`**: Parameter-level attribute information
+
+* **`GetMemberAttributes`**: Attributes for specific members
+
+* **`GetParameterAttributes`**: Parameter-level attribute information
 
 ### XML Documentation
-- **`GetXmlDocsForType`**: Extract type-level XML documentation
-- **`GetXmlDocsForMember`**: Member-specific documentation (summary/params/returns/remarks)
+
+* **`GetXmlDocsForType`**: Extract type-level XML documentation
+
+* **`GetXmlDocsForMember`**: Member-specific documentation (summary/params/returns/remarks)
 
 ### Project & Solution Analysis
-- **`AnalyzeSolution`**: Parse .sln files and enumerate projects
-- **`AnalyzeProject`**: Project metadata, references, and build configuration
-- **`GetProjectOutputPaths`**: Resolve output directories for different configurations
-- **`ResolvePackageReferences`**: Map NuGet packages to cached assemblies
-- **`FindDepsJsonDependencies`**: Parse deps.json for runtime dependencies
+
+* **`AnalyzeSolution`**: Parse .sln files and enumerate projects
+
+* **`AnalyzeProject`**: Project metadata, references, and build configuration
+* **`GetProjectOutputPaths`**: Resolve output directories for different configurations
+* **`ResolvePackageReferences`**: Map NuGet packages to cached assemblies
+* **`FindDepsJsonDependencies`**: Parse deps.json for runtime dependencies
 
 ### Configuration & Runtime
-- **`GetRuntimeOptions`**: Current server configuration and defaults
-- **`UpdateRuntimeOptions`**: Modify pagination, caching, and search behavior
+
+* **`GetRuntimeOptions`**: Current server configuration and defaults
+
+* **`UpdateRuntimeOptions`**: Modify pagination, caching, and search behavior
 
 ### Advanced Filtering & Pagination
 
 All member analysis tools support comprehensive filtering and pagination:
 
 **Filtering Options:**
+
 * `caseSensitive` (bool): Case-sensitive type/member matching
 * `nameContains` (string): Filter by member name substring
 * `hasAttributeContains` (string): Filter by attribute type substring
@@ -331,6 +350,7 @@ All member analysis tools support comprehensive filtering and pagination:
 * `includeStatic` / `includeInstance` (bool): Member type filtering
 
 **Pagination:**
+
 * `skip` / `take` (int): Standard offset pagination
 * `maxItems` (int): Maximum results per request (default 50; `FindReferencesTo` defaults to 25)
 * `continuationToken` (string): Token-based pagination for large datasets
@@ -346,6 +366,7 @@ Most enumerating tools default to a lean **`summary`** projection and let you op
 * `noCache` (bool): bypass the response cache for a single call when you suspect stale results.
 
 **Type Resolution:**
+
 * Supports full names (`Namespace.Type`), simple names (`Type`), and nested types (`Outer+Inner`)
 * Case sensitivity controlled by `caseSensitive` parameter
 * Automatic fallback resolution for ambiguous type names
@@ -374,24 +395,26 @@ Contributions are welcome. This repo includes an `.editorconfig` with modern C# 
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated changelog generation. All commits must follow this format:
 
-```
+```text
 type(scope): description
 ```
 
 **Valid types:**
-- `feat` - A new feature
-- `fix` - A bug fix
-- `docs` - Documentation only changes
-- `style` - Code style changes (formatting, semicolons, etc)
-- `refactor` - Code change that neither fixes a bug nor adds a feature
-- `perf` - Performance improvement
-- `test` - Adding or correcting tests
-- `build` - Changes to build system or dependencies
-- `ci` - Changes to CI configuration
-- `chore` - Other changes that don't modify src or test files
-- `revert` - Reverts a previous commit
+
+* `feat` - A new feature
+* `fix` - A bug fix
+* `docs` - Documentation only changes
+* `style` - Code style changes (formatting, semicolons, etc)
+* `refactor` - Code change that neither fixes a bug nor adds a feature
+* `perf` - Performance improvement
+* `test` - Adding or correcting tests
+* `build` - Changes to build system or dependencies
+* `ci` - Changes to CI configuration
+* `chore` - Other changes that don't modify src or test files
+* `revert` - Reverts a previous commit
 
 **Examples:**
+
 ```bash
 git commit -m "feat(tools): add new assembly analysis tool"
 git commit -m "fix: resolve null reference in type loader"
@@ -433,12 +456,14 @@ git push --follow-tags
 ```
 
 The release workflow will automatically:
+
 1. Build and test the project
 2. Create a GitHub Release with changelog notes
 3. Publish the NuGet package
 4. Update `server.json` with the new version
 
 ## MCP Registry
+
 mcp-name: io.github.jcucci/dotnet-sherlock-mcp
 
 ## License
