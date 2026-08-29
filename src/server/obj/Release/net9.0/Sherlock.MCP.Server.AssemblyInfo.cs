@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright © 2026")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Model Context Protocol server for .NET assembly analysis and reflection")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("2.13.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.13.0+5842eab8e57e1121a12b129b082935632d393ee4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.13.0+f326c639ad63b07818ed6ccb1febe24d1aea0c07")]
 [assembly: System.Reflection.AssemblyProductAttribute("Sherlock MCP Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Sherlock.MCP.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("2.13.0.0")]
